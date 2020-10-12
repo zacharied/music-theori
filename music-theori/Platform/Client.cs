@@ -2,6 +2,7 @@
 
 using theori.Database;
 using theori.Graphics;
+using theori.InternetRanking;
 using theori.IO;
 
 namespace theori.Platform
@@ -80,6 +81,9 @@ namespace theori.Platform
             LayerStack.EndInputStep();
 
             DatabaseWorker.Update();
+
+            if (InternetRankingService.IsInitialized)
+                InternetRankingService.Service.Update();
         }
 
         #region Update

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Numerics;
-
+using System.Security.Cryptography;
 using theori.Database;
 using theori.GameModes;
 
@@ -61,7 +61,10 @@ namespace theori.Charting
         public time_t ChartDuration { get; set; } = 0;
 
         public string Tags { get; set; } = "";
-        
+
+        // TODO(neko) Decide upon a consistent and safe way to store this information
+        public string? SourceFileHash { get; set; } = null;
+
         public override bool Equals(object obj) => obj is ChartInfo info && Equals(info);
         bool IEquatable<ChartInfo>.Equals(ChartInfo other)
         {

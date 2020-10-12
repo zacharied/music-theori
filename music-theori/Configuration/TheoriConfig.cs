@@ -19,5 +19,8 @@ namespace theori.Configuration
         [Config] public static float MasterVolume { get; set; } = 0.6f;
         [Config] public static string ChartsDirectory { get; set; } = "charts";
         [Config] public static string? SelectedController { get; set; } = null;
+        [Config] public static string? InternetRankingUrl { get; set; } = null;
+        [Config] public static string? InternetRankingUsername { get; set; } = null;
+        [Config] public static string? InternetRankingPassword { get; set; } = null;
     }
 }
