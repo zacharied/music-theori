@@ -18,12 +18,19 @@ namespace theori.InternetRanking
     internal class OrchestraFmIr : InternetRankingProvider
     {
         private readonly string m_serviceUrl;
+        private readonly string m_username;
+        private readonly string m_password;
+
         private string? m_jwtBearer = null;
 
         public OrchestraFmIr(HttpClient http) : base(http)
         {
             m_serviceUrl = UserConfigManager.GetFromKey("theori.InternetRankingUrl")?.ToString() ??
                            throw new NullReferenceException("InternetRankingUrl not set");
+            m_username = UserConfigManager.GetFromKey("theori.InternetRankingUsername")?.ToString() ??
+                           throw new NullReferenceException("InternetRankingUsername not set");
+            m_password = UserConfigManager.GetFromKey("theori.InternetRankingPassword")?.ToString() ??
+                           throw new NullReferenceException("InternetRankingPassword not set");
             m_jwtBearer = null;
         }
 
@@ -77,7 +84,7 @@ namespace theori.InternetRanking
 
         public async Task Login()
         {
-            const string loginReq = "{\"username\":\"test123\",\"password\":\"x\"}";
+            string loginReq = $"{{\"username\":\"{m_username}\",\"password\":\"{m_password}\"}}";
             Logger.Log($"Request: {loginReq}");
             var responseText =
                 await Request(HttpMethod.Post, "authorize/basic", new ByteArrayContent(Encoding.UTF8.GetBytes(loginReq))).Result.Content.ReadAsStringAsync();
