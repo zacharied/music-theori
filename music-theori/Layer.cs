@@ -13,6 +13,7 @@ using theori.Database;
 using theori.GameModes;
 using theori.Graphics;
 using theori.Graphics.OpenGL;
+using theori.InternetRanking;
 using theori.IO;
 using theori.Platform;
 using theori.Resources;
@@ -109,6 +110,7 @@ namespace theori
         public readonly Table tblTheoriLayer;
         public readonly Table tblTheoriModes;
         public readonly Table tblTheoriNet;
+        public readonly Table tblTheoriInternetRanking;
         public readonly Table tblTheoriInputKeyboard;
         public readonly Table tblTheoriInputMouse;
         public readonly Table tblTheoriInputGamepad;
@@ -173,6 +175,7 @@ namespace theori
             tblTheori["layer"] = tblTheoriLayer = m_script.NewTable();
             tblTheori["modes"] = tblTheoriModes = m_script.NewTable();
             tblTheori["net"] = tblTheoriNet = m_script.NewTable();
+            tblTheori["internetRanking"] = tblTheoriInternetRanking = m_script.NewTable();
 
             tblTheoriInput["textInput"] = evtTextInput = m_script.NewEvent();
 
@@ -298,6 +301,8 @@ namespace theori
 
                 return groupedCharts;
             });
+
+            tblTheoriInternetRanking["submissionStatus"] = (Func<InternetRankingService.InternetRankingSubmissionStatus>) (() => InternetRankingService.SubmissionStatus);
 
             tblTheoriConfig["get"] = (Func<string, DynValue>)(key => FromObject(m_script.Script, UserConfigManager.GetFromKey(key)));
             tblTheoriConfig["set"] = (Action<string, DynValue>)((key, value) => UserConfigManager.SetFromKey(key, value.ToObject()));

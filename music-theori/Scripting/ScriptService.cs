@@ -12,6 +12,7 @@ using theori.Scoring;
 
 using MoonSharp.Interpreter;
 using theori.Database;
+using theori.InternetRanking;
 
 namespace theori.Scripting
 {
@@ -78,6 +79,8 @@ namespace theori.Scripting
             RegisterType<ChartSetInfoHandle>();
             RegisterType<ChartSetInfoSubsection>();
             RegisterType<ChartInfoHandle>();
+
+            RegisterType<InternetRankingService.InternetRankingSubmissionStatus>();
         }
 
         public static void RegisterType<T>() => UserData.RegisterType<T>();
