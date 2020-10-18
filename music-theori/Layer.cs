@@ -303,6 +303,8 @@ namespace theori
             });
 
             tblTheoriInternetRanking["submissionStatus"] = (Func<InternetRankingService.InternetRankingSubmissionStatus>) (() => InternetRankingService.SubmissionStatus);
+            tblTheoriInternetRanking["errorMessage"] =
+                (Func<DynValue>) (() => FromObject(m_script.Script, InternetRankingService.SubmissionStatus.Error?.Message));
 
             tblTheoriConfig["get"] = (Func<string, DynValue>)(key => FromObject(m_script.Script, UserConfigManager.GetFromKey(key)));
             tblTheoriConfig["set"] = (Action<string, DynValue>)((key, value) => UserConfigManager.SetFromKey(key, value.ToObject()));
