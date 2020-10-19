@@ -36,45 +36,50 @@ namespace theori.InternetRanking
 
         public override async Task SubmitScore(ChartInfo chart, Dictionary<string, dynamic> scoreObject)
         {
+            string responseText;
+
             try
             {
-                if (m_jwtBearer == null)
-                {
-                    await Login();
-                }
+                m_submissionStatus.InProgress = true;
 
-                Logger.Log("Sending score");
+                if (m_jwtBearer == null)
+                    await Login();
 
                 if (chart.SourceFileHash == null)
                     throw new InvalidOperationException("missing source file hash");
 
-                m_submissionStatus.InProgress = true;
-
-                Logger.Log($"Chart file hash: {chart.SourceFileHash}");
-
-                var responseText = await Request(HttpMethod.Get, $"board/sha3/{chart.SourceFileHash.ToLower()}").Result
-                    .Content.ReadAsStringAsync();
-                Logger.Log($"Response: {responseText}");
+                try
+                {
+                    var res = await Request(HttpMethod.Get, $"board/sha3/{chart.SourceFileHash.ToLower()}");
+                    responseText = await res.Content.ReadAsStringAsync();
+                }
+                catch (InternetRankingException e) when (e.IsNetworkError)
+                {
+                    throw new InternetRankingException("Failed getting board object for chart hash", e);
+                }
 
                 // Deserialize response to a list of dictionaries. This is probably kinda stupid.
                 var result = JsonConvert.DeserializeObject<JObject>(responseText);
-                Logger.Log("Parsed");
 
                 // TODO(neko) Type check object
                 scoreObject.Add("track", result["track_id"]);
                 scoreObject.Add("board", result["id"]);
 
                 var text = JsonConvert.SerializeObject(scoreObject);
-                Logger.Log($"Sending score request: {text}");
-                responseText =
-                    await Request(HttpMethod.Post, $"score", new ByteArrayContent(Encoding.UTF8.GetBytes(text))).Result.Content.ReadAsStringAsync();
-                Logger.Log($"Response: {responseText}");
+
+                try
+                {
+                    var res = await Request(HttpMethod.Post, $"score", new ByteArrayContent(Encoding.UTF8.GetBytes(text)));
+                    responseText = await res.Content.ReadAsStringAsync();
+                }
+                catch (InternetRankingException e) when (e.IsNetworkError)
+                {
+                    throw new InternetRankingException("Failed submitting score object", e);
+                }
             }
-            catch (Exception e)
+            catch (InternetRankingException e)
             {
                 m_submissionStatus.Error = e;
-                Logger.Log(e.Message);
-                throw e;
             }
             finally
             {
@@ -85,13 +90,20 @@ namespace theori.InternetRanking
         public async Task Login()
         {
             string loginReq = $"{{\"username\":\"{m_username}\",\"password\":\"{m_password}\"}}";
-            Logger.Log($"Request: {loginReq}");
-            var responseText =
-                await Request(HttpMethod.Post, "authorize/basic", new ByteArrayContent(Encoding.UTF8.GetBytes(loginReq))).Result.Content.ReadAsStringAsync();
+
+            string responseText;
+            try
+            {
+                var res = await Request(HttpMethod.Post, "authorize/basic", new ByteArrayContent(Encoding.UTF8.GetBytes(loginReq)));
+                responseText = await res.Content.ReadAsStringAsync();
+            }
+            catch (InternetRankingException e) when (e.IsNetworkError)
+            {
+                throw new InternetRankingException("Failed to login", e);
+            }
+
             var result = JsonConvert.DeserializeObject<JObject>(responseText);
-            Logger.Log($"Login response: {result}");
             m_jwtBearer = result["bearer"].ToString().Trim();
-            Logger.Log($"Got bearer: {m_jwtBearer}");
         }
 
         private async Task<HttpResponseMessage> Request(HttpMethod method, string path, HttpContent? body = null)
@@ -120,13 +132,9 @@ namespace theori.InternetRanking
             }
 
             var res = await m_http.SendAsync(request);
-            return res.EnsureSuccessStatusCode();
-        }
-
-        public class OrchestraFmApiException : Exception
-        {
-            public OrchestraFmApiException(string message) : base(message)
-            { }
+            if (!res.IsSuccessStatusCode)
+                throw new InternetRankingException($"HTTP request failure {res.StatusCode}", res);
+            return res;
         }
     }
 }
