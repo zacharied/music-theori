@@ -569,6 +569,46 @@ namespace theori.Graphics
             }
         }
 
+        public void FillStringBounded(string text, float x, float y, float w)
+        {
+            Vector2 bounds;
+            List<string> lines = new List<string>();
+
+            int offset = 0, splitIndex = 0;
+            string newText = text;
+            
+            while (true)
+            {
+                bounds = MeasureString(newText.Trim());
+                if (bounds.X <= w)
+                {
+                    lines.Add(newText.TrimStart());
+                    if (offset + newText.Length == text.Length)
+                        break;
+
+                    newText = text.Substring(offset + splitIndex);
+                    offset += splitIndex;
+                    splitIndex = 0;
+                    
+                    continue;
+                }
+
+                // Remove a single word from the end, or a single character if there are no words
+                splitIndex = newText.Contains(' ') ? newText.LastIndexOf(' ') : newText.Length - 1;
+                newText = newText.Substring(0, splitIndex);
+
+                if (newText.Length == 0)
+                {
+                    // If we can't split at all, then give up. This will only happen if `w` is smaller than a single character
+                    lines.Add(newText);
+                    break;
+                }
+            }
+
+            foreach(var line in lines.Select((Text, Index) => new {Text, Index}))
+                FillString(line.Text, x, y + line.Index * bounds.Y);
+        }
+
         public Vector2 MeasureString(string text)
         {
             using var _ = Profiler.Scope(nameof(MeasureString));

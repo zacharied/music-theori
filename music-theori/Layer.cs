@@ -333,6 +333,7 @@ namespace theori
             tblTheoriGraphics["setFontSize"] = (Action<int>)(size => m_batch?.SetFontSize(size));
             tblTheoriGraphics["setTextAlign"] = (Action<Anchor>)(align => m_batch?.SetTextAlign(align));
             tblTheoriGraphics["fillString"] = (Action<string, float, float>)((text, x, y) => m_batch?.FillString(text, x, y));
+            tblTheoriGraphics["fillStringBounded"] = (Action<string, float, float, float>) ((text, x, y, w) => m_batch?.FillStringBounded(text, x, y, w));
             tblTheoriGraphics["measureString"] = (Func<string, DynValue>)(text => { var bounds = m_batch?.MeasureString(text)!.Value; return NewTuple(NewNumber(bounds.X), NewNumber(bounds.Y)); });
             tblTheoriGraphics["fillPathAt"] = (Action<Path2DCommands, float, float, float, float>)((path, x, y, sx, sy) => m_batch?.FillPathAt(path, x, y, sx, sy));
             tblTheoriGraphics["saveScissor"] = (Action)(() => m_batch?.SaveScissor());
