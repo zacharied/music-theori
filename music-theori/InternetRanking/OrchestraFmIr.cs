@@ -79,6 +79,7 @@ namespace theori.InternetRanking
             }
             catch (InternetRankingException e)
             {
+                Logger.Log($"IR error: {e}", LogPriority.Error);
                 m_submissionStatus.Error = e;
             }
             finally
@@ -115,15 +116,11 @@ namespace theori.InternetRanking
                 Headers =
                 {
                     { HttpRequestHeader.Accept.ToString(), System.Net.Mime.MediaTypeNames.Application.Json },
-                    { HttpRequestHeader.CacheControl.ToString(), new CacheControlHeaderValue {NoCache = true}.ToString() },
-                    { "Cache-Control", new CacheControlHeaderValue {NoCache = true}.ToString() }
                 }
             };
 
             if (m_jwtBearer != null)
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", m_jwtBearer);
-
-            Logger.Log($"Headers: {request.Headers}");
 
             if (body != null)
             {
